@@ -34,7 +34,7 @@ def doesObjectExist(bucketName, s3key):
 def uploadObject(localObject, bucketName, s3key):
     try:
         s3client.upload_file(localObject, bucketName, s3key)
-        print(s3client.put_object_acl(ACL='public-read', Bucket=bucketName, Key=s3key))
+        #print(s3client.put_object_acl(ACL='public-read', Bucket=bucketName, Key=s3key))
         return True
     except Exception as e:
         return e
