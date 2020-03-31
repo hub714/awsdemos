@@ -4,7 +4,8 @@ import sys
 from os import listdir, walk
 from os.path import isfile, join
 
-bucketName = 'huberttest'
+# bucketName = 'huberttest'
+bucketName = 'huberttest-pdx'
 bucketPath = 'sm-groundtruth'
 localPath = 'images'
 

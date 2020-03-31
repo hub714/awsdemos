@@ -1,0 +1,229 @@
+Description: >
+  Starting template for Sagemaker-Groundtruth-Demo
+  Last Modified: March 27 2020
+
+Parameters:
+  CallbackURL:
+    Type: CommaDelimitedList
+    Default: 'https://d3c4ozbynv3jtc.cloudfront.net,https://lre0543qdj.labeling.us-east-1.sagemaker.aws,https://lre0543qdj.labeling.us-east-1.sagemaker.aws/oauth2/idpresponse'
+
+  LogoutURLs:
+    Type: CommaDelimitedList
+    Default: 'https://lre0543qdj.labeling.us-east-1.sagemaker.aws/logout'
+
+  AppClientName:
+    Type: String
+    Default: 'groundtruth-demo-app-client'
+
+  OktaMetadataURL:
+    Type: String
+    Default: 'https://dev-642335.okta.com/app/exk2ziyz7u0fP6ukN4x6/sso/saml/metadata'
+
+  GroundTruthDomain:
+    Type: String
+    Default: sm-groundtruth-demo
+
+Resources:
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+
+  CognitoUserGroupEnglish:
+    Description: Default English language User Pool Group
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: English_default
+      UserPoolId: !Ref CognitoUserPool
+
+  CognitoAppClient:
+    Description: UserPool Client to hook up with Okta
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs: !Ref CallbackURL
+      ClientName: !Ref AppClientName
+      LogoutURLs: !Ref LogoutURLs
+      SupportedIdentityProviders:
+        - !Ref CognitoIdentityProvider
+      UserPoolId: !Ref CognitoUserPool
+
+  CognitoIdentityProvider:
+    Description: UserPool Federated Identity Provider setup
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      AttributeMapping: {"email":"http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"}
+      IdpIdentifiers:
+        - SAML
+      ProviderDetails: {"MetadataURL":"https://dev-642335.okta.com/app/exk2ziyz7u0fP6ukN4x6/sso/saml/metadata"}
+      ProviderName: Okta
+      ProviderType: SAML
+      UserPoolId: !Ref CognitoUserPool
+
+  CognitoUserPoolDomain:
+    Description: Domain or Custom domain for your user pool
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref GroundTruthDomain
+      UserPoolId: !Ref CognitoUserPool
+
+  # SageMakerDefaultWorkTeam:
+  #   DependsOn: CognitoUserPoolDomain
+  #   Type: AWS::SageMaker::Workteam
+  #   Properties:
+  #     Description: The default workteam for all users coming in from Okta
+  #     MemberDefinitions:
+  #       - CognitoMemberDefinition:
+  #           CognitoClientId: !Ref CognitoAppClient
+  #           CognitoUserGroup: !Ref CognitoUserGroupEnglish
+  #           CognitoUserPool: !Ref CognitoUserPool
+
+  #
+  #
+  # AddRoleToInstance:
+  #   Description: Add LabIdeRole to Cloud9 IDE Instance
+  #   Type: Custom::AddRoleToInstance
+  #   DependsOn: AddRoleToInstanceFunction
+  #   Properties:
+  #     ServiceToken: !GetAtt AddRoleToInstanceFunction.Arn
+  #     Region: !Ref AWS::Region
+  #     StackName: !Ref AWS::StackName
+  #     EnvironmentId: !Ref InterstellaCloud9Environment
+  #     LabIdeInstanceProfileName: !Ref ECSInstanceProfile
+  #     LabIdeInstanceProfileArn: !GetAtt ECSInstanceProfile.Arn
+  #     Cloud9BootstrapDoc: !Ref Cloud9BootstrapDoc
+  #
+  # AddRoleToInstanceFunction:
+  #   Type: AWS::Lambda::Function
+  #   Properties:
+  #     Code:
+  #       ZipFile: !Sub |
+  #         from __future__ import print_function
+  #         import boto3
+  #         import logging
+  #         import json
+  #         import time
+  #         import traceback
+  #         import cfnresponse
+  #
+  #         logger = logging.getLogger()
+  #         logger.setLevel(logging.INFO)
+  #
+  #         def handler(event, context):
+  #             logger.debug('Event: {}'.format(event))
+  #             logger.debug('Context: {}'.format(context))
+  #             responseData = {}
+  #
+  #             # Immediately respond on Delete
+  #             if event['RequestType'] == 'Delete':
+  #                 try:
+  #                     cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, 'CustomResourcePhysicalID')
+  #                 except Exception as e:
+  #                     logger.error(e, exc_info=True)
+  #                     responseData = {'Error': traceback.format_exc(e)}
+  #                     cfnresponse.send(event, context, cfnresponse.FAILED, responseData, 'CustomResourcePhysicalID')
+  #
+  #             if event['RequestType'] == 'Create':
+  #                 try:
+  #                     ec2 = boto3.client('ec2')
+  #                     ssm = boto3.client('ssm')
+  #                     # Get InstanceId of the Cloud9 IDE
+  #                     instance = ec2.describe_instances(Filters=[{'Name':'tag:aws:cloud9:environment', 'Values':[event['ResourceProperties']['EnvironmentId']]}])['Reservations'][0]['Instances'][0]
+  #                     instanceId = instance['InstanceId']
+  #
+  #                     # Create the IamInstanceProfile request object
+  #                     iam_instance_profile = {
+  #                         'Arn': event['ResourceProperties']['LabIdeInstanceProfileArn'],
+  #                         'Name': event['ResourceProperties']['LabIdeInstanceProfileName']
+  #                     }
+  #                     # Wait for Instance to become ready before adding Role
+  #                     instance_state = instance['State']['Name']
+  #                     while instance_state != 'running':
+  #                         time.sleep(3)
+  #                         instance_state = ec2.describe_instances(InstanceIds=[instanceId])
+  #                     if 'IamInstanceProfile' in instance:
+  #                         association_id = ec2.describe_iam_instance_profile_associations(Filters=
+  #                           [{'Name':'instance-id','Values':[instanceId]}])['IamInstanceProfileAssociations'][0]['AssociationId']
+  #                         ec2.replace_iam_instance_profile_association(IamInstanceProfile=iam_instance_profile, AssociationId=association_id)
+  #                     else:
+  #                         ec2.associate_iam_instance_profile(IamInstanceProfile=iam_instance_profile, InstanceId=instanceId)
+  #                     time.sleep(5)
+  #                     ec2.reboot_instances(InstanceIds=[instanceId])
+  #                     bootstrapStatus = ssm.list_commands(InstanceId=instanceId)
+  #                     if (bool(bootstrapStatus['Commands'])):
+  #                         print('Already bootstrapping. Skipping send_command')
+  #                         bootstrapCommandId = bootstrapStatus['Commands'][0]['CommandId']
+  #                     else:
+  #                         while bootstrapStatus != 'Pending':
+  #                             try:
+  #                                 bootstrapCommand = ssm.send_command( InstanceIds=[ instanceId ], DocumentName=event['ResourceProperties']['Cloud9BootstrapDoc'], Comment='Bootstrapping Cloud9 Instance')
+  #                                 print('Initial Command Status:'+bootstrapCommand['Command']['Status'])
+  #                                 bootstrapStatus = bootstrapCommand['Command']['Status']
+  #                                 bootstrapCommandId = bootstrapCommand['Command']['CommandId']
+  #                             except Exception as e:
+  #                                 time.sleep(5)
+  #                                 pass
+  #                     commandStatus = ssm.list_commands(CommandId=bootstrapCommandId)
+  #                     while commandStatus['Commands'][0]['Status'] != 'Success':
+  #                         commandStatus = ssm.list_commands(CommandId=bootstrapCommandId)
+  #                         print("Polling for Command Status: "+commandStatus['Commands'][0]['Status'])
+  #                         time.sleep(5)
+  #                     responseData = {'Success': 'Role added to instance'+instanceId+'.'}
+  #                     cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, 'CustomResourcePhysicalID')
+  #                 except Exception as e:
+  #                     logger.error(e, exc_info=True)
+  #                     responseData = {'Error': traceback.format_exc(e)}
+  #                     cfnresponse.send(event, context, cfnresponse.FAILED, responseData, 'CustomResourcePhysicalID')
+  #
+  #     Handler: index.handler
+  #     Role:
+  #       Fn::GetAtt:
+  #       - LambdaExecutionRole
+  #       - Arn
+  #     Runtime: python2.7
+  #     Timeout: '300'
+  # LambdaExecutionRole:
+  #   Type: AWS::IAM::Role
+  #   Properties:
+  #     AssumeRolePolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #       - Effect: Allow
+  #         Principal:
+  #           Service:
+  #           - lambda.amazonaws.com
+  #         Action:
+  #         - sts:AssumeRole
+  #     Path: "/"
+  #     Policies:
+  #     - PolicyName: root
+  #       PolicyDocument:
+  #         Version: '2012-10-17'
+  #         Statement:
+  #         - Effect: Allow
+  #           Action:
+  #           - logs:CreateLogGroup
+  #           - logs:CreateLogStream
+  #           - logs:PutLogEvents
+  #           Resource: arn:aws:logs:*:*:*
+  #         - Effect: Allow
+  #           Action:
+  #           - cloudformation:DescribeStacks
+  #           - cloudformation:DescribeStackEvents
+  #           - cloudformation:DescribeStackResource
+  #           - cloudformation:DescribeStackResources
+  #           - ec2:DescribeInstances
+  #           - ec2:AssociateIamInstanceProfile
+  #           - ec2:ReplaceIamInstanceProfileAssociation
+  #           - ec2:DescribeIamInstanceProfileAssociations
+  #           - ec2:RebootInstances
+  #           - iam:ListInstanceProfiles
+  #           - iam:PassRole
+  #           - ssm:SendCommand
+  #           - ssm:ListCommands
+  #           Resource: '*'
