@@ -41,6 +41,7 @@ Resources:
     Properties:
       AllowedOAuthFlows:
         - code
+        - implicit
       AllowedOAuthFlowsUserPoolClient: true
       AllowedOAuthScopes:
         - email
@@ -48,6 +49,12 @@ Resources:
         - profile
       CallbackURLs: !Ref CallbackURL
       ClientName: !Ref AppClientName
+      # ExplicitAuthFlows:
+      #   - ALLOW_CUSTOM_AUTH
+      #   - ALLOW_REFRESH_TOKEN_AUTH
+      #   - ALLOW_USER_PASSWORD_AUTH
+      #   - ALLOW_USER_SRP_AUTH
+      GenerateSecret: true # This is needed to create a workteam
       LogoutURLs: !Ref LogoutURLs
       SupportedIdentityProviders:
         - !Ref CognitoIdentityProvider
@@ -72,16 +79,16 @@ Resources:
       Domain: !Ref GroundTruthDomain
       UserPoolId: !Ref CognitoUserPool
 
-  # SageMakerDefaultWorkTeam:
-  #   DependsOn: CognitoUserPoolDomain
-  #   Type: AWS::SageMaker::Workteam
-  #   Properties:
-  #     Description: The default workteam for all users coming in from Okta
-  #     MemberDefinitions:
-  #       - CognitoMemberDefinition:
-  #           CognitoClientId: !Ref CognitoAppClient
-  #           CognitoUserGroup: !Ref CognitoUserGroupEnglish
-  #           CognitoUserPool: !Ref CognitoUserPool
+  SageMakerDefaultWorkTeam:
+    DependsOn: CognitoUserPoolDomain
+    Type: AWS::SageMaker::Workteam
+    Properties:
+      Description: The default workteam for all users coming in from Okta
+      MemberDefinitions:
+        - CognitoMemberDefinition:
+            CognitoClientId: !Ref CognitoAppClient
+            CognitoUserGroup: !Ref CognitoUserGroupEnglish
+            CognitoUserPool: !Ref CognitoUserPool
 
   #
   #
