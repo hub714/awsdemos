@@ -3,9 +3,9 @@ Description: >
   Last Modified: March 31 2020
 
 Parameters:
-  # CallbackURL:
-  #   Type: CommaDelimitedList
-  #   Default: 'https://d3c4ozbynv3jtc.cloudfront.net,https://lre0543qdj.labeling.us-east-1.sagemaker.aws,https://lre0543qdj.labeling.us-east-1.sagemaker.aws/oauth2/idpresponse'
+  CallbackURL:
+    Type: CommaDelimitedList
+    Default: 'https://d3c4ozbynv3jtc.cloudfront.net,https://lre0543qdj.labeling.us-east-1.sagemaker.aws,https://lre0543qdj.labeling.us-east-1.sagemaker.aws/oauth2/idpresponse'
 
   LogoutURLs:
     Type: CommaDelimitedList
@@ -15,9 +15,9 @@ Parameters:
     Type: String
     Default: 'groundtruth-demo-app-client'
 
-  # OktaMetadataURL:
-  #   Type: String
-  #   Default: 'https://dev-642335.okta.com/app/exk55sc2vOR8UFBkT4x6/sso/saml/metadata'
+  OktaMetadataURL:
+    Type: String
+    Default: 'https://dev-642335.okta.com/app/exk57t55953j30hae4x6/sso/saml/metadata'
 
   GroundTruthDomain:
     Type: String
@@ -39,15 +39,15 @@ Resources:
     Description: UserPool Client to hook up with Okta
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      # AllowedOAuthFlows:
-        # - code
-        # - implicit
-      # AllowedOAuthFlowsUserPoolClient: true
-      # AllowedOAuthScopes:
-      #   - email
-      #   - openid
-      #   - profile
-      # CallbackURLs: !Ref CallbackURL
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs: !Ref CallbackURL
       ClientName: !Ref AppClientName
       # ExplicitAuthFlows:
       #   - ALLOW_CUSTOM_AUTH
@@ -55,24 +55,24 @@ Resources:
       #   - ALLOW_USER_PASSWORD_AUTH
       #   - ALLOW_USER_SRP_AUTH
       GenerateSecret: true # This is needed to create a workteam
-      # LogoutURLs: !Ref LogoutURLs
-      # SupportedIdentityProviders:
-      #   - !Ref CognitoIdentityProvider
+      LogoutURLs: !Ref LogoutURLs
+      SupportedIdentityProviders:
+        - !Ref CognitoIdentityProvider
       UserPoolId: !Ref CognitoUserPool
 
-  # CognitoIdentityProvider:
-  #   Description: UserPool Federated Identity Provider setup
-  #   Type: AWS::Cognito::UserPoolIdentityProvider
-  #   Properties:
-  #     AttributeMapping:
-  #       email: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
-  #     IdpIdentifiers:
-  #       - SAML
-  #     ProviderDetails:
-  #       MetadataURL: !Ref OktaMetadataURL
-  #     ProviderName: Okta
-  #     ProviderType: SAML
-  #     UserPoolId: !Ref CognitoUserPool
+  CognitoIdentityProvider:
+    Description: UserPool Federated Identity Provider setup
+    Type: AWS::Cognito::UserPoolIdentityProvider
+    Properties:
+      AttributeMapping:
+        email: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+      IdpIdentifiers:
+        - SAML
+      ProviderDetails:
+        MetadataURL: !Ref OktaMetadataURL
+      ProviderName: Okta
+      ProviderType: SAML
+      UserPoolId: !Ref CognitoUserPool
 
   CognitoUserPoolDomain:
     Description: Domain or Custom domain for your user pool
