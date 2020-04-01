@@ -5,11 +5,9 @@ Description: >
 Parameters:
   CallbackURL:
     Type: CommaDelimitedList
-    Default: 'https://d3c4ozbynv3jtc.cloudfront.net,https://lre0543qdj.labeling.us-east-1.sagemaker.aws,https://lre0543qdj.labeling.us-east-1.sagemaker.aws/oauth2/idpresponse'
 
   LogoutURLs:
     Type: CommaDelimitedList
-    Default: 'https://lre0543qdj.labeling.us-east-1.sagemaker.aws/logout'
 
   AppClientName:
     Type: String
@@ -17,7 +15,6 @@ Parameters:
 
   OktaMetadataURL:
     Type: String
-    Default: 'https://dev-642335.okta.com/app/exk57t55953j30hae4x6/sso/saml/metadata'
 
   GroundTruthDomain:
     Type: String
