@@ -37,12 +37,13 @@ Internal
 
 Copy link of Identity Provider Metadata
 
-### Update CFN
-- Update OktaMetadataURL with above link
-- aws cloudformation deploy --template-file cfn/core-updated.yml --stack-name groundtruth-demo-core --parameter-overrides "CallbackURL=https://z182d0xam0.labeling.us-west-2.sagemaker.aws,https://z182d0xam0.labeling.us-west-2.sagemaker.aws/oauth2/idpresponse" "LogoutURLs=https://z182d0xam0.labeling.us-west-2.sagemaker.aws/logout" "OktaMetadataURL=https://dev-642335.okta.com/app/exk57t55953j30hae4x6/sso/saml/metadata"
-
 ### Update CallbackURL in Cognito
 - Do describe on workteam
+
+### Update CFN
+- Update OktaMetadataURL with above link
+- Update labeling endpoint in cfn
+- aws cloudformation deploy --template-file cfn/core-updated.yml --stack-name groundtruth-demo-core --parameter-overrides "LabelingEndpoint=https://z182d0xam0.labeling.us-west-2.sagemaker.aws" "OktaMetadataURL=https://dev-642335.okta.com/app/exk57wzajs2Jst0oh4x6/sso/saml/metadata"
 
 ### Create Bookmark
 - Look @ the Bookmark URL in outputs and copy/paste
@@ -51,15 +52,17 @@ Add people to both bookmark and app
 
 ### Create GT Job
 - upload lambda for CFN custom resource
-- pip install -r lambda/requirements.txt --target lambda
-- cd lambda && zip -r9 ../createjob-lambda.zip . && cd ..
-- aws s3 cp createjob-lambda.zip s3://huberttest-pdx/createjob-lambda.zip
-- aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-2 --capabilities CAPABILITY_IAM
+- pip install -r lambda/requirements.txt --target lambda/packages
+- cd lambda/packages && zip -r9 ../../createjob-lambda.zip . && cd .. && zip -r9 ../createjob-lambda.zip . -x "*packages*" && cd .. && aws s3 cp createjob-lambda.zip s3://huberttest-pdx/createjob-lambda.zip && aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-5 --capabilities CAPABILITY_IAM
 
 ## Reset Instructions
 1. ./reset.sh
 2. Delete CFN stack
 
+
+## Todo:
+- Create lambda for auto-add to group
+- Update lambda to use cfn params
 
 ## Misc notes...
 Disable cognito user pool auth <-- enabling this will allow logout to work

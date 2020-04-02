@@ -3,13 +3,10 @@ Description: >
   Last Modified: March 31 2020
 
 Parameters:
-  # CallbackURL:
-  #   Type: CommaDelimitedList
-  #   Default: 'https://d3c4ozbynv3jtc.cloudfront.net,https://lre0543qdj.labeling.us-east-1.sagemaker.aws,https://lre0543qdj.labeling.us-east-1.sagemaker.aws/oauth2/idpresponse'
 
-  LogoutURLs:
-    Type: CommaDelimitedList
-    Default: 'https://lre0543qdj.labeling.us-east-1.sagemaker.aws/logout'
+  # LabelingEndpoint:
+  #   Description: The AWS endpoint your labelers would go to direct from Sagemaker
+  #   Type: String
 
   AppClientName:
     Type: String
@@ -17,7 +14,6 @@ Parameters:
 
   # OktaMetadataURL:
   #   Type: String
-  #   Default: 'https://dev-642335.okta.com/app/exk55sc2vOR8UFBkT4x6/sso/saml/metadata'
 
   GroundTruthDomain:
     Type: String
@@ -47,7 +43,9 @@ Resources:
       #   - email
       #   - openid
       #   - profile
-      # CallbackURLs: !Ref CallbackURL
+      # CallbackURLs:
+      #   - !Sub "${LabelingEndpoint}"
+      #   - !Sub "${LabelingEndpoint}/oauth2/idpresponse"
       ClientName: !Ref AppClientName
       # ExplicitAuthFlows:
       #   - ALLOW_CUSTOM_AUTH
@@ -55,7 +53,8 @@ Resources:
       #   - ALLOW_USER_PASSWORD_AUTH
       #   - ALLOW_USER_SRP_AUTH
       GenerateSecret: true # This is needed to create a workteam
-      # LogoutURLs: !Ref LogoutURLs
+      # LogoutURLs:
+      #   - !Sub ${LabelingEndpoint}/logout
       # SupportedIdentityProviders:
       #   - !Ref CognitoIdentityProvider
       UserPoolId: !Ref CognitoUserPool
@@ -92,6 +91,77 @@ Resources:
             CognitoUserGroup: !Ref CognitoUserGroupEnglish
             CognitoUserPool: !Ref CognitoUserPool
 
+  AddToDefaultGroupLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Environment:
+        Variables:
+          UserPoolId: !Ref CognitoUserPool
+          DefaultUserGroup: !Ref CognitoUserGroupEnglish
+      Code:
+        ZipFile: !Sub |
+          import json
+          import boto3
+          import logging
+          import os
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          cognitoClient = boto3.client('cognito-idp')
+
+          def lambda_handler(event, context):
+
+              UserPoolId = os.environ['UserPoolId']
+              DefaultUserGroup = os.environ['DefaultUserGroup']
+
+              print(event)
+              try:
+
+                  response = cognitoClient.admin_add_user_to_group(
+                      UserPoolId=UserPoolId,
+                      Username=event['userName'],
+                      GroupName=DefaultUserGroup
+                  )
+              except Exception as e:
+                  logger.debug('An error occured - Event: {}'.format(e))
+                  return 'An error occured - see logs'
+              return event
+
+      Handler: index.lambda_handler
+      Role: !GetAtt 'AddToDefaultGroupLambdaExecutionRole.Arn'
+      Runtime: python3.7
+      Timeout: '300'
+
+  AddToDefaultGroupLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - cognito-idp:AdminAddUserToGroup
+            Resource: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPool}
+
 Outputs:
   SSODomain:
     Description: SSO Domain to put into Okta
@@ -101,6 +171,12 @@ Outputs:
     Description: Value for Audience URL when creating Okta App
     Value: !Sub urn:amazon:cognito:sp:${CognitoUserPool}
 
-  BookmarkURL:
-    Description: Value for the Bookmark URL
-    Value: !Sub https://${GroundTruthDomain}.auth.${AWS::Region}.amazoncognito.com/authorize?response_type=code&identity_provider=Okta&client_id=${CognitoAppClient}&redirect_uri=https://z182d0xam0.labeling.${AWS::Region}.sagemaker.aws
+  # BookmarkURL:
+  #   Description: Value for the Bookmark URL
+  #   Value: !Sub https://${GroundTruthDomain}.auth.${AWS::Region}.amazoncognito.com/authorize?response_type=code&identity_provider=Okta&client_id=${CognitoAppClient}&redirect_uri=${LabelingEndpoint}
+
+  WorkTeamArn:
+    Description: Arn for the SM Workteam that was created
+    Value: !Ref SageMakerDefaultWorkTeam
+    Export:
+      Name: !Sub ${AWS::StackName}-WorkTeamArn
