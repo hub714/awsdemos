@@ -68,14 +68,11 @@ Add people to both bookmark and app
 - Go to Okta in new incognito tab
 - Click bookmark
 
-## Reset Instructions
+<!-- ## Reset Instructions
 1. ./reset.sh
-2. Delete CFN stack
+2. Delete CFN stack -->
 
 
-## Todo:
-- Create lambda for auto-add to group
-- Update lambda to use cfn params
 
 ## Misc notes...
 Disable cognito user pool auth <-- enabling this will allow logout to work
