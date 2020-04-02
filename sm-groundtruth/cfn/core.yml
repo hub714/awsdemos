@@ -23,6 +23,10 @@ Resources:
 
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
+    # Properties:
+    #   LambdaConfig:
+    #     PostConfirmation: !GetAtt AddToDefaultGroupLambdaFunction.Arn
+
 
   CognitoUserGroupEnglish:
     Description: Default English language User Pool Group
