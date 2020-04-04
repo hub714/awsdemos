@@ -4,9 +4,9 @@ Description: >
 
 Parameters:
 
-  # LabelingEndpoint:
-  #   Description: The AWS endpoint your labelers would go to direct from Sagemaker
-  #   Type: String
+  LabelingEndpoint:
+    Description: The AWS endpoint your labelers would go to direct from Sagemaker
+    Type: String
 
   AppClientName:
     Type: String
@@ -34,24 +34,24 @@ Resources:
     Description: Default English language User Pool Group
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      GroupName: !Ref DefaultGroupName
+      GroupName: English_default
       UserPoolId: !Ref CognitoUserPool
 
   CognitoAppClient:
     Description: UserPool Client to hook up with Okta
     Type: AWS::Cognito::UserPoolClient
     Properties:
-      # AllowedOAuthFlows:
-        # - code
-        # - implicit
-      # AllowedOAuthFlowsUserPoolClient: true
-      # AllowedOAuthScopes:
-      #   - email
-      #   - openid
-      #   - profile
-      # CallbackURLs:
-      #   - !Sub "${LabelingEndpoint}"
-      #   - !Sub "${LabelingEndpoint}/oauth2/idpresponse"
+      AllowedOAuthFlows:
+        - code
+        - implicit
+      AllowedOAuthFlowsUserPoolClient: true
+      AllowedOAuthScopes:
+        - email
+        - openid
+        - profile
+      CallbackURLs:
+        - !Sub "${LabelingEndpoint}"
+        - !Sub "${LabelingEndpoint}/oauth2/idpresponse"
       ClientName: !Ref AppClientName
       # ExplicitAuthFlows:
       #   - ALLOW_CUSTOM_AUTH
@@ -59,11 +59,11 @@ Resources:
       #   - ALLOW_USER_PASSWORD_AUTH
       #   - ALLOW_USER_SRP_AUTH
       GenerateSecret: true # This is needed to create a workteam
-      # LogoutURLs:
-      #   - !Sub ${LabelingEndpoint}/logout
-      # SupportedIdentityProviders:
+      LogoutURLs:
+        - !Sub ${LabelingEndpoint}/logout
+      SupportedIdentityProviders:
         # - !Ref CognitoIdentityProvider
-        # - COGNITO
+        - COGNITO
       UserPoolId: !Ref CognitoUserPool
 
   # CognitoIdentityProvider:
@@ -175,18 +175,18 @@ Resources:
       Principal: cognito-idp.amazonaws.com
 
 Outputs:
-  SSODomain:
-    Description: SSO Domain to put into Okta
-    Value: !Sub https://${GroundTruthDomain}.auth.${AWS::Region}.amazoncognito.com/saml2/idpresponse
-
-  AudienceURI:
-    Description: Value for Audience URL when creating Okta App
-    Value: !Sub urn:amazon:cognito:sp:${CognitoUserPool}
-
-  # BookmarkURL:
-  #   Description: Value for the Bookmark URL
-  #   Value: !Sub https://${GroundTruthDomain}.auth.${AWS::Region}.amazoncognito.com/authorize?response_type=code&identity_provider=Okta&client_id=${CognitoAppClient}&redirect_uri=${LabelingEndpoint}
-
+#   SSODomain:
+#     Description: SSO Domain to put into Okta
+#     Value: !Sub https://${GroundTruthDomain}.auth.${AWS::Region}.amazoncognito.com/saml2/idpresponse
+#
+#   AudienceURI:
+#     Description: Value for Audience URL when creating Okta App
+#     Value: !Sub urn:amazon:cognito:sp:${CognitoUserPool}
+#
+#   BookmarkURL:
+#     Description: Value for the Bookmark URL
+#     Value: !Sub https://${GroundTruthDomain}.auth.${AWS::Region}.amazoncognito.com/authorize?response_type=code&identity_provider=Okta&client_id=${CognitoAppClient}&redirect_uri=${LabelingEndpoint}
+#
   WorkTeamArn:
     Description: Arn for the SM Workteam that was created
     Value: !Ref SageMakerDefaultWorkTeam

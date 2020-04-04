@@ -19,19 +19,22 @@ Parameters:
     Type: String
     Default: sm-groundtruth-demo-new
 
+  DefaultGroupName:
+    Type: String
+
 Resources:
 
   CognitoUserPool:
     Type: AWS::Cognito::UserPool
-    # Properties:
-      # LambdaConfig:
-      #   PostConfirmation: !GetAtt AddToDefaultGroupLambdaFunction.Arn
+    Properties:
+      LambdaConfig:
+        PostConfirmation: !GetAtt AddToDefaultGroupLambdaFunction.Arn
 
   CognitoUserGroupEnglish:
     Description: Default English language User Pool Group
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      GroupName: English_default
+      GroupName: !Ref DefaultGroupName
       UserPoolId: !Ref CognitoUserPool
 
   CognitoAppClient:
@@ -100,8 +103,7 @@ Resources:
     Properties:
       Environment:
         Variables:
-          UserPoolId: !Ref CognitoUserPool
-          DefaultUserGroup: !Ref CognitoUserGroupEnglish
+          DefaultUserGroup: !Ref DefaultGroupName
       Code:
         ZipFile: !Sub |
           import json
@@ -116,14 +118,13 @@ Resources:
 
           def lambda_handler(event, context):
 
-              UserPoolId = os.environ['UserPoolId']
               DefaultUserGroup = os.environ['DefaultUserGroup']
 
               print(event)
               try:
 
                   response = cognitoClient.admin_add_user_to_group(
-                      UserPoolId=UserPoolId,
+                      UserPoolId=event['userPoolId'],
                       Username=event['userName'],
                       GroupName=DefaultUserGroup
                   )
@@ -164,7 +165,15 @@ Resources:
           - Effect: Allow
             Action:
             - cognito-idp:AdminAddUserToGroup
-            Resource: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPool}
+            Resource: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/*
+
+  LambdaAccessPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref AddToDefaultGroupLambdaFunction
+      Principal: cognito-idp.amazonaws.com
+
 Outputs:
   SSODomain:
     Description: SSO Domain to put into Okta

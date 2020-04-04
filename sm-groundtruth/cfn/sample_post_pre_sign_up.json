@@ -1,0 +1,23 @@
+{
+	"version": "1",
+	"region": "us-west-2",
+	"userPoolId": "us-west-2_3YIrsRC9z",
+	"userName": "hubertcheung+aa@gmail.com",
+	"callerContext": {
+		"awsSdkVersion": "aws-sdk-js-2.442.0",
+		"clientId": "CLIENT_ID_NOT_APPLICABLE"
+	},
+	"triggerSource": "PreSignUp_AdminCreateUser",
+	"request": {
+		"userAttributes": {
+			"email_verified": "True",
+			"email": "hubertcheung+aa@gmail.com"
+		},
+		"validationData": None
+	},
+	"response": {
+		"autoConfirmUser": False,
+		"autoVerifyEmail": False,
+		"autoVerifyPhone": False
+	}
+}
