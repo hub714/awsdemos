@@ -68,3 +68,10 @@ if (response):
     print("Manifest.json successfully uploaded to S3")
 else:
     print("There was an error uploading the manifest.json to S3: "+response)
+
+response = uploadObject('annotation-tool/template.liquid', bucketName, bucketPath+'/annotation-tool/template.liquid')
+
+if (response):
+    print("UI Template successfully uploaded to S3")
+else:
+    print("There was an error uploading the UI Template to S3: "+response)

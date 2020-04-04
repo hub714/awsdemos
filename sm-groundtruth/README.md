@@ -68,8 +68,8 @@ Here we will create an Okta SAML2 application. You have to use the old admin con
 ![Create New Application](images/createApp-2.png)
 
 5. SAML Settings
-- **Single sign on URL:** *<Enter value of CloudFormation Output SSODomain>*
-- **Audience URI (SP Entity ID)**: *<Enter value of CloudFormation Output AudienceURI>*
+- **Single sign on URL:** *Enter value of CloudFormation Output SSODomain*
+- **Audience URI (SP Entity ID)**: *Enter value of CloudFormation Output AudienceURI*
 - **Name ID Format:** EmailAddress
 - **Attribute Statements**
   - **Name:** http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
@@ -114,18 +114,31 @@ Cognito does not currently supprt IdP initiated flows, so all flows must initiat
 ![Bookmark](images/addBookmark.png)
 
 **General Settings**
-- **Application Label:** <Enter a name for the bookmark>
-- **URL:** *<Enter value of CloudFormation Output BookmarkURL>*
+- **Application Label:** *Enter a name for the bookmark*
+- **URL:** *Enter value of CloudFormation Output BookmarkURL*
 
-![Bookmark2](images/addBookmark2.png)
+![Bookmark2](images/addBookmark-2.png)
 
 2. Assign users to your bookmark.
 
 ### Create GT Job
 Now it's time to finally create a GroundTruth labeling job. We will use a CloudFormation custom resouce to create the GroundTruth labeling job. The custom resource will call a Lambda function to create a job on the fly when you create the CloudFormation stack.
 
-1. Package Lambda function
+1. Update Lambda function
+The Lambda function takes a number of parameters from CloudFormation:
+- WorkTeamArn
+- SageMakerExecutionRole
+- LabelAttributeName
+- S3ManifestURI
+- LabelingS3Bucket
+
+Please make sure you edit these options by using --parameter override or modifying the CloudFormation template defaults. The CoreStackName parameter must be whatever your core stack name is as it will pull in the Work Team that was created initially.
+
+In Line 52 of the Lambda function's index.py, there is a LabelJobUiTemplatePath that gets passed into the Labeling Job creation API later. This references a 'template.liquid' file that is in the sm-groundtruth/upload-images/annotation-tool folder within this repo. The template is the default one from AWS. Feel free to update. It does have to exist, and for the custom Lambda to work, it is expecting it in your S3 bucket/config path (Line 45)/annotation-tool/template.liquid.
+
+2. Package Lambda function
 I won't be going into detail about how to package a Lambda function, but the simplest way is to zip all the packages you need and the code like this:
+
 ```
 $ pip install -r lambda/requirements.txt --target lambda/packages
 - cd lambda/packages && zip -r9 ../../createjob-lambda.zip . && cd .. && zip -r9 ../createjob-lambda.zip . -x "*packages*" && cd .. && aws s3 cp createjob-lambda.zip s3://huberttest-pdx/createjob-lambda.zip
@@ -133,7 +146,7 @@ $ pip install -r lambda/requirements.txt --target lambda/packages
 
 - Then deploy it again:
 ```
-$ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-6 --capabilities CAPABILITY_IAM
+$ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job --capabilities CAPABILITY_IAM
 ```
 
 ### Test Access

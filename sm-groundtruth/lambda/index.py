@@ -47,8 +47,11 @@ def lambda_handler(event, context):
     LabelJobTitle = LabelJobName
 
     LabelJobOutputPath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/output/'
-    LabelJobUiTemplatePath = LabelJobOutputPath+'cfn-testing/annotation-tool/template.liquid'
 
+    # Use your own UI template. By default, this demo is using one that was uploaded in the first step. 
+    LabelJobUiTemplatePath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/annotation-tool/template.liquid'
+
+    # CloudFormation custom resouces will send a RequestType of Delete, Update, or Create to Lambda. We need to figure out what it is and do something based on the specific request.
     # Immediately respond on Delete
     if event['RequestType'] == 'Delete':
         try:
@@ -66,7 +69,9 @@ def lambda_handler(event, context):
             responseData = {'Error': str(e)}
             cfnresponse.send(event, context, cfnresponse.FAILED, responseData, 'CustomResourcePhysicalID')
 
+
     if event['RequestType'] == 'Create':
+        # First, SM-GT is looking for a label category. In the console, this is where you would type in something for your annotators to choose. It's written as a JSON file and I've just left it in Lambda to upload as it's hard coded. You can upload separately and reference an object in S3.
         localFile = open(LabelCategoryConfigLocalPath+'/'+LabelCategoryConfigFileName, "w")
         localFile.write('''
             {
@@ -91,6 +96,7 @@ def lambda_handler(event, context):
         try:
             response = s3Client.upload_file(LabelCategoryConfigLocalPath+'/'+LabelCategoryConfigFileName, LabelCategoryConfigS3Bucket, LabelCategoryConfigS3Path+"/"+LabelCategoryConfigFileName)
 
+            # API for creating a labeling (groundtruth) job.
             response = smClient.create_labeling_job(
                 LabelingJobName=LabelJobName,
                 LabelAttributeName=labelAttributeName,
