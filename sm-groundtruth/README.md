@@ -162,7 +162,7 @@ $ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name g
 ## Flow if you dont need Okta
 
 1. Upload Images
-Same step as the Okta flow for [uploading images](# upload-images)
+Same step as the Okta flow for [uploading images](#upload-images)
 
 2. Deploy bare Cognito stack
 Same steps as [Create bare bones Cognito User Pool and Sagemaker Work Team](#launch-first-cfn-stack)
@@ -183,6 +183,3 @@ See [Create GT Job](#create-gt-job)
 ```
 $ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-6 --capabilities CAPABILITY_IAM
 ```
-
-
-### ToDo:
