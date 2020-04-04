@@ -10,16 +10,22 @@ This first section is only necessary if you do not already have images and a man
 
 1. Set up Python 3.7 working environment with virtualenv
 First of all, to keep your laptop clean, I used virtualenv. Install it using pip or anything else you might like and create the venv:
-- virtualenv groundtruth-demo
-- source groundtruth-demo/bin/activate
+```
+$ virtualenv groundtruth-demo
+$ source groundtruth-demo/bin/activate
+```
 
 2. Install pip requirements
 The setup.py script has a number of requirements: boto, jsonlines, etc. First, install the dependencies:
-- pip install -r requirements.txt
+```
+$ pip install -r requirements.txt
+```
 
 3. Run setup to upload images and manifest
 The python file currently has hard coded values for an S3 bucket and the path in lines 8 and 9. Feel free to change these but note that you will also need to update the custom resource index.py later.
-- python setup.py
+```
+$ python setup.py
+```
 
 ### Configure Cognito [TODO]
 1. Launch CFN template for Cognito
