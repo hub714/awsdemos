@@ -1,8 +1,8 @@
 {
 	"version": "1",
 	"region": "us-west-2",
-	"userPoolId": "us-west-2_3YIrsRC9z",
-	"userName": "hubertcheung+aa@gmail.com",
+	"userPoolId": "us-west-2_3YExampleC9z",
+	"userName": "aSampleEmail@gmail.com",
 	"callerContext": {
 		"awsSdkVersion": "aws-sdk-js-2.442.0",
 		"clientId": "CLIENT_ID_NOT_APPLICABLE"
@@ -11,7 +11,7 @@
 	"request": {
 		"userAttributes": {
 			"email_verified": "True",
-			"email": "hubertcheung+aa@gmail.com"
+			"email": "aSampleEmail@gmail.com"
 		},
 		"validationData": None
 	},
