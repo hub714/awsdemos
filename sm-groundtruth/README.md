@@ -10,6 +10,8 @@ The purpose of this demo is to show how one could initiate a flow from the Okta 
 5. Create Okta bookmark
 6. Create job via CFN custom resource
 
+<a name='upload-images' />
+
 ### Upload demo tennis images + Create/upload manifest
 
 This first section is only necessary if you do not already have images and a manifest file. Effectively, it will just take the images folder, upload them to a bucket, create a manifest file, and upload that as well. SM GroundTruth will use the manifest file to create the actual labeling job later on.
@@ -33,6 +35,7 @@ The python file currently has hard coded values for an S3 bucket and the path in
 ```
 $ python setup.py
 ```
+<a name='launch-first-cfn-stack' />
 
 ### Create bare bones Cognito User Pool and Sagemaker Work Team
 1. Launch CFN template core.yml
@@ -88,6 +91,7 @@ Assuming this is just a demo, specify that you are using an internal app.
 8. Assign Users to your Okta group
 
 <a name="getLabelingEndpoint" />
+
 ### Get Labeling endpoint
 CloudFormation does not return the labeling endpoint from a workforce, so we will go to the AWS console and get the link. Without Okta, this is the link that annotators would go to by default to start labeling.
 
@@ -122,6 +126,7 @@ Cognito does not currently supprt IdP initiated flows, so all flows must initiat
 
 2. Assign users to your bookmark.
 
+<a name="create-gt-job" />
 ### Create GT Job
 Now it's time to finally create a GroundTruth labeling job. We will use a CloudFormation custom resouce to create the GroundTruth labeling job. The custom resource will call a Lambda function to create a job on the fly when you create the CloudFormation stack.
 
@@ -157,17 +162,23 @@ $ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name g
 ## Flow if you dont need Okta
 
 1. Upload Images
+Same step as the Okta flow for [uploading images](# upload-images)
+
 2. Deploy bare Cognito stack
+Same steps as [Create bare bones Cognito User Pool and Sagemaker Work Team](#launch-first-cfn-stack)
 ```
 $ aws cloudformation deploy --template-file cfn/core.yml --stack-name groundtruth-demo-core --parameter-override "DefaultGroupName=English_default" --capabilities CAPABILITY_IAM
 ```
+
 3. Deploy Updated stack with Labeling Endpoint
+Skip all the Okta stuff and make sure you use the core-nookta.yml file.
 See [Get Labeling endpoint](#getLabelingEndpoint)
 ```
 $ aws cloudformation deploy --template-file cfn/core-nookta.yml --stack-name groundtruth-demo-core --parameter-overrides "LabelingEndpoint=https://z182d0xam0.labeling.us-west-2.sagemaker.aws" "DefaultGroupName=English_default" --capabilities CAPABILITY_IAM
 ```
 
 4. Deploy Labeling Job
+See [Create GT Job](#create-gt-job)
 
 ```
 $ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-6 --capabilities CAPABILITY_IAM
