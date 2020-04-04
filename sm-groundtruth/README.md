@@ -127,6 +127,7 @@ Cognito does not currently supprt IdP initiated flows, so all flows must initiat
 2. Assign users to your bookmark.
 
 <a name="create-gt-job" />
+
 ### Create GT Job
 Now it's time to finally create a GroundTruth labeling job. We will use a CloudFormation custom resouce to create the GroundTruth labeling job. The custom resource will call a Lambda function to create a job on the fly when you create the CloudFormation stack.
 
