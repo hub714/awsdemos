@@ -87,6 +87,7 @@ Assuming this is just a demo, specify that you are using an internal app.
 
 8. Assign Users to your Okta group
 
+<a name="getLabelingEndpoint" />
 ### Get Labeling endpoint
 CloudFormation does not return the labeling endpoint from a workforce, so we will go to the AWS console and get the link. Without Okta, this is the link that annotators would go to by default to start labeling.
 
@@ -155,12 +156,22 @@ $ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name g
 
 ## Flow if you dont need Okta
 
-- aws cloudformation deploy --template-file cfn/core.yml --stack-name groundtruth-demo-core --parameter-override "DefaultGroupName=English_default" --capabilities CAPABILITY_IAM
+1. Upload Images
+2. Deploy bare Cognito stack
+```
+$ aws cloudformation deploy --template-file cfn/core.yml --stack-name groundtruth-demo-core --parameter-override "DefaultGroupName=English_default" --capabilities CAPABILITY_IAM
+```
+3. Deploy Updated stack with Labeling Endpoint
+See [Get Labeling endpoint](#getLabelingEndpoint)
+```
+$ aws cloudformation deploy --template-file cfn/core-nookta.yml --stack-name groundtruth-demo-core --parameter-overrides "LabelingEndpoint=https://z182d0xam0.labeling.us-west-2.sagemaker.aws" "DefaultGroupName=English_default" --capabilities CAPABILITY_IAM
+```
 
-- aws cloudformation deploy --template-file cfn/core-nookta.yml --stack-name groundtruth-demo-core --parameter-overrides "LabelingEndpoint=https://z182d0xam0.labeling.us-west-2.sagemaker.aws" "DefaultGroupName=English_default" --capabilities CAPABILITY_IAM
+4. Deploy Labeling Job
 
-aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-6 --capabilities CAPABILITY_IAM
-
+```
+$ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-6 --capabilities CAPABILITY_IAM
+```
 
 
 ### ToDo:
