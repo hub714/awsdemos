@@ -11,8 +11,13 @@ This first section is only necessary if you do not already have images and a man
 1. Set up Python 3.7 working environment with virtualenv
 First of all, to keep your laptop clean, I used virtualenv. Install it using pip or anything else you might like and create the venv:
 ```
+<<<<<<< HEAD
 $ virtualenv groundtruth-demo
 $ source groundtruth-demo/bin/activate
+=======
+- virtualenv groundtruth-demo
+- source groundtruth-demo/bin/activate
+>>>>>>> c94a9b820f9528fe86ee9db4e1c4730ed981d599
 ```
 
 2. Install pip requirements
