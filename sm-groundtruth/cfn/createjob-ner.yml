@@ -40,7 +40,7 @@ Resources:
     Properties:
       Code:
         S3Bucket: !Ref LabelingS3Bucket
-        S3Key: createjob-lambda-ner.zip
+        S3Key: createjob-ner.zip
       Handler: index.lambda_handler
       Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: python3.7

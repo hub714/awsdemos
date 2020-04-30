@@ -12,6 +12,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
+    print(event)
     print(event['ResourceProperties'])
 
     logger.debug('Event: {}'.format(event))
@@ -52,8 +53,8 @@ def lambda_handler(event, context):
     LabelJobUiTemplatePath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/annotation-tool/template.liquid'
 
     # Parameterize Annotation ARNs
-    AnnotationConsolidationLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:ACS-NamedEntityRecognition'
-    LabelingJobAlgorithmSpecificationArn = 'arn:aws:sagemaker:region:027400017018:labeling-job-algorithm-specification/text-classification'
+    AnnotationConsolidationLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:ACS-ImageMultiClass'
+    LabelingJobAlgorithmSpecificationArn = 'arn:aws:sagemaker:us-west-2:027400017018:labeling-job-algorithm-specification/image-classification'
     PreHumanTaskLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:PRE-ImageMultiClass'
 
     # CloudFormation custom resouces will send a RequestType of Delete, Update, or Create to Lambda. We need to figure out what it is and do something based on the specific request.
