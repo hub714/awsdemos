@@ -48,8 +48,13 @@ def lambda_handler(event, context):
 
     LabelJobOutputPath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/output/'
 
-    # Use your own UI template. By default, this demo is using one that was uploaded in the first step. 
+    # Use your own UI template. By default, this demo is using one that was uploaded in the first step.
     LabelJobUiTemplatePath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/annotation-tool/template.liquid'
+
+    # Parameterize Annotation ARNs
+    AnnotationConsolidationLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:ACS-NamedEntityRecognition'
+    LabelingJobAlgorithmSpecificationArn = 'arn:aws:sagemaker:region:027400017018:labeling-job-algorithm-specification/text-classification'
+    PreHumanTaskLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:PRE-ImageMultiClass'
 
     # CloudFormation custom resouces will send a RequestType of Delete, Update, or Create to Lambda. We need to figure out what it is and do something based on the specific request.
     # Immediately respond on Delete
@@ -118,7 +123,7 @@ def lambda_handler(event, context):
                     'UiConfig': {
                         'UiTemplateS3Uri': LabelJobUiTemplatePath
                     },
-                    'PreHumanTaskLambdaArn': 'arn:aws:lambda:us-west-2:081040173940:function:PRE-ImageMultiClass',
+                    'PreHumanTaskLambdaArn': PreHumanTaskLambdaArn,
                     # 'TaskKeywords': [
                     #     'string',
                     # ],
@@ -129,11 +134,11 @@ def lambda_handler(event, context):
                     # 'TaskAvailabilityLifetimeInSeconds': 123,
                     # 'MaxConcurrentTaskCount': 123,
                     'AnnotationConsolidationConfig': {
-                        'AnnotationConsolidationLambdaArn': 'arn:aws:lambda:us-west-2:081040173940:function:ACS-ImageMultiClass'
+                        'AnnotationConsolidationLambdaArn': AnnotationConsolidationLambdaArn
                     }
                 },
                 LabelingJobAlgorithmsConfig={
-                    'LabelingJobAlgorithmSpecificationArn': 'arn:aws:sagemaker:us-west-2:027400017018:labeling-job-algorithm-specification/image-classification',
+                    'LabelingJobAlgorithmSpecificationArn': LabelingJobAlgorithmSpecificationArn,
                     # 'InitialActiveLearningModelArn': 'string',
                     # 'LabelingJobResourceConfig': {
                     #     'VolumeKmsKeyId': 'string'
