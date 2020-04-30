@@ -148,12 +148,19 @@ I won't be going into detail about how to package a Lambda function, but the sim
 
 ```
 $ pip install -r lambda/requirements.txt --target lambda/packages
-- cd lambda/packages && zip -r9 ../../createjob-lambda.zip . && cd .. && zip -r9 ../createjob-lambda.zip . -x "*packages*" && cd .. && aws s3 cp createjob-lambda.zip s3://huberttest-pdx/createjob-lambda.zip
+# For Image Classification
+$ cd lambda/
+$ ./bundle-imgclass.sh
+# For NER
+$ cd lambda/
+$ ./bundle-ner.sh
+$ cd ..
 ```
 
-- Then deploy it again:
+- Then deploy it:
 ```
-$ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job --capabilities CAPABILITY_IAM
+$ aws cloudformation deploy --template-file cfn/createjob-imgclass.yml --stack-name groundtruth-demo-job-imgclass --capabilities CAPABILITY_IAM
+$ aws cloudformation deploy --template-file cfn/createjob-ner.yml --stack-name groundtruth-demo-job-ner --capabilities CAPABILITY_IAM
 ```
 
 ### Test Access
