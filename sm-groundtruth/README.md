@@ -195,6 +195,7 @@ $ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name g
 ## Changes to create NER labeling jobs
 
 There are four things that need to be changed:
+
 1. Updated manifest file
 - see sample [here](https://github.com/hub714/awsdemos/blob/master/sm-groundtruth/initial-setup/sample-manifests/sample-manifest-ner.json)
 - This is generated from this [sample tweets file](https://github.com/hub714/awsdemos/blob/master/sm-groundtruth/initial-setup/text/tweets.txt)
