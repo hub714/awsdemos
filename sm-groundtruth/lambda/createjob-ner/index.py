@@ -41,16 +41,18 @@ def lambda_handler(event, context):
 
     # Get S3 bucket that we will be storing data. This determines output as well as looks for some manifest info
     LabelCategoryConfigS3Bucket = event['ResourceProperties']['LabelingS3Bucket']
+
+    # Arbitary Filename
     LabelCategoryConfigFileName = 'LabelCategoryConfig.json'
     LabelCategoryConfigLocalPath = '/tmp'
-    LabelCategoryConfigS3Path = 'sm-groundtruth'
+    LabelCategoryConfigS3Path = 'sm-groundtruth-text'
     LabelJobName = 'LabelingJob-'+timePrefix
     LabelJobTitle = LabelJobName
 
     LabelJobOutputPath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/output/'
 
     # Use your own UI template. By default, this demo is using one that was uploaded in the first step.
-    LabelJobUiTemplatePath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/annotation-tool/template.liquid'
+    LabelJobUiTemplatePath = 's3://'+LabelCategoryConfigS3Bucket+'/'+LabelCategoryConfigS3Path+'/annotation-tool/template-ner.liquid'
 
     # Parameterize Annotation ARNs
     AnnotationConsolidationLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:ACS-NamedEntityRecognition'

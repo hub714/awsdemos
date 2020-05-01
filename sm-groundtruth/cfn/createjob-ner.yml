@@ -17,7 +17,7 @@ Parameters:
 
   S3ManifestURI:
     Type: String
-    Default: s3://huberttest-pdx/sm-groundtruth/manifest.json
+    Default: s3://huberttest-pdx/sm-groundtruth-text/manifest.json
 
 Resources:
   CreateLabelingJobCustomResource:
