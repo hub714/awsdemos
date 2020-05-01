@@ -56,7 +56,7 @@ def lambda_handler(event, context):
 
     # Parameterize Annotation ARNs
     AnnotationConsolidationLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:ACS-NamedEntityRecognition'
-    LabelingJobAlgorithmSpecificationArn = 'arn:aws:sagemaker:us-west-2:027400017018:labeling-job-algorithm-specification/text-classification'
+    # LabelingJobAlgorithmSpecificationArn = 'arn:aws:sagemaker:us-west-2:027400017018:labeling-job-algorithm-specification/text-classification'
     PreHumanTaskLambdaArn = 'arn:aws:lambda:us-west-2:081040173940:function:PRE-NamedEntityRecognition'
 
     # CloudFormation custom resouces will send a RequestType of Delete, Update, or Create to Lambda. We need to figure out what it is and do something based on the specific request.
