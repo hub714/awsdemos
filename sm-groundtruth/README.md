@@ -191,3 +191,22 @@ See [Create GT Job](#create-gt-job)
 ```
 $ aws cloudformation deploy --template-file cfn/createjob-cfn.yml --stack-name groundtruth-demo-job-6 --capabilities CAPABILITY_IAM
 ```
+
+## Changes to create NER labeling jobs
+
+There are four things that need to be changed:
+1. Updated manifest file
+- see sample [here](https://github.com/hub714/awsdemos/blob/master/sm-groundtruth/initial-setup/sample-manifests/sample-manifest-ner.json)
+- This is generated from this [sample tweets file](https://github.com/hub714/awsdemos/blob/master/sm-groundtruth/initial-setup/text/tweets.txt)
+
+2. Update [Custom Lambda function](https://github.com/hub714/awsdemos/blob/master/sm-groundtruth/lambda/createjob-ner/index.py)
+- Removal of LabelingJobAlgorithmSpecificationArn (Lines 146 - 152)
+- Changed [AnnotationConsolidationLambdaArn](https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_AnnotationConsolidationConfig.html), [PreHumanTaskLambdaArn](https://docs.aws.amazon.com/sagemaker/latest/APIReference/API_HumanTaskConfig.html) to appropriate values per documentation for NER (Lines 143/52, 132/60 )
+- Updated LabelCategoryConfig json file (Lines 85 - 102)
+- Upload Lambda function to S3 for reference in #4
+
+3. [Annotation template.liquid](https://github.com/hub714/awsdemos/blob/master/sm-groundtruth/initial-setup/annotation-tool/template-ner.liquid)
+
+4. [CloudFormation Template](https://github.com/hub714/awsdemos/blob/master/sm-groundtruth/cfn/createjob-ner.yml)
+- S3ManifestURI must reflect the new manifest file URI
+- Update CreateLabelingJobLambdaFunction to reflect new Lambda function
