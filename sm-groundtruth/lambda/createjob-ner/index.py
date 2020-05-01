@@ -84,13 +84,16 @@ def lambda_handler(event, context):
                 "document-version": "2018-11-28",
                 "labels": [
                     {
-                        "label": "Tennis!"
+                        "label": "Bias for Action!",
+                        "shortDisplayName": "B4A"
                     },
                     {
-                        "label": "Not Tennis!"
+                        "label": "Customer Obsession",
+                        "shortDisplayName": "CO"
                     },
                     {
-                        "label": "A boat"
+                        "label": "Ownership",
+                        "shortDisplayName": "OWN"
                     }
                 ]
             }'''
