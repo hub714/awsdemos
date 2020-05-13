@@ -147,7 +147,8 @@ In Line 52 of the Lambda function's index.py, there is a LabelJobUiTemplatePath 
 I won't be going into detail about how to package a Lambda function, but the simplest way is to zip all the packages you need and the code like this:
 
 ```
-$ pip install -r lambda/requirements.txt --target lambda/packages
+$ pip install -r lambda/createjob-imgclass/requirements.txt --target lambda/createjob-imgclass/packages
+$ pip install -r lambda/createjob-ner/requirements.txt --target lambda/createjob-ner/packages
 # For Image Classification
 $ cd lambda/
 $ ./bundle-imgclass.sh
