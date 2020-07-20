@@ -51,7 +51,7 @@ Parameters:
     AllowedValues:
       - dsml
       - labs
-    ConstraintDescription: Must be of value DS or Labs to identify the team
+    ConstraintDescription: Must be of specific values to identify the team
     Default: dsml
 
   Subnet:
@@ -62,7 +62,6 @@ Parameters:
   DefaultSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
     Description: Provide the default SecurityGroup Id
-    Default: 'sg-006328d617627c2fe'
     MinLength: 1
 
 Resources:
