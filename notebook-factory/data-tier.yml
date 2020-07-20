@@ -15,7 +15,7 @@ Metadata:
         Label:
           default: "Custom Configuration"
         Parameters:
-          - Roletype
+          - RoleType
 
 Parameters:
   S3BucketName:
@@ -23,8 +23,8 @@ Parameters:
     Type: String
     Default: notebook-factory-s3-bucket
 
-  Roletype:
-    Description: Roletype for tagging and auth
+  RoleType:
+    Description: RoleType for tagging and auth
     Type: String
     AllowedValues:
       - dsml
@@ -48,18 +48,18 @@ Resources:
               KMSMasterKeyID: !Ref KmsKey
               SSEAlgorithm: aws:kms
       Tags:
-        - Key: Roletype
-          Value: !Ref Roletype
+        - Key: RoleType
+          Value: !Ref RoleType
 
   KmsKey:
     Type: AWS::KMS::Key
     Properties:
-      Description: !Sub KMS Encryption Key for ${Roletype} teams
+      Description: !Sub KMS Encryption Key for ${RoleType} teams
       Enabled: True
       EnableKeyRotation: True
       Tags:
-        - Key: Roletype
-          Value: !Ref Roletype
+        - Key: RoleType
+          Value: !Ref RoleType
       KeyPolicy: !Sub |
         {
             "Version": "2012-10-17",
@@ -101,7 +101,7 @@ Resources:
                         "StringLike": {
                             "aws:PrincipalArn": [
                                 "arn:aws:iam::${AWS::AccountId}:role/AdministratorRole*",
-                                "arn:aws:iam::${AWS::AccountId}:role/${Roletype}*"
+                                "arn:aws:iam::${AWS::AccountId}:role/${RoleType}*"
                             ]
                         }
                     }
@@ -161,4 +161,4 @@ Outputs:
     Description: Key Id of the newly created KMS key
     Value: !Ref KmsKey
     Export:
-      Name: !Sub ${Roletype}-DefaultKMSKey
+      Name: !Sub ${RoleType}-DefaultKMSKey

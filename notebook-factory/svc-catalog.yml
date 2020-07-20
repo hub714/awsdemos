@@ -4,8 +4,8 @@ Metadata:
 Description: 'SageMaker Notebook Template based on Enable self-service, secured data science using Amazon SageMaker notebooks and AWS Service Catalog AWS blog'
 Parameters:
 
-  Roletype:
-    Description: Team Prefix for authentication purposes (roletype)
+  RoleType:
+    Description: Team Prefix for authentication purposes (RoleType)
     Type: String
     AllowedValues:
       - dsml
@@ -25,8 +25,8 @@ Resources:
             LoadTemplateFromURL: https://huberttest-pdx.s3-us-west-2.amazonaws.com/notebook-factory/sm-notebook.yml
           Name: Python 3.8 TF 2.2
       Tags:
-        - Key: Roletype
-          Value: !Ref Roletype
+        - Key: RoleType
+          Value: !Ref RoleType
   SvcCatalogNotebookPortfolio:
     Type: AWS::ServiceCatalog::Portfolio
     Properties:
@@ -34,8 +34,8 @@ Resources:
       DisplayName: SageMaker Notebook Portfolio
       ProviderName: Data Science
       Tags:
-        - Key: Roletype
-          Value: !Ref Roletype
+        - Key: RoleType
+          Value: !Ref RoleType
   SvcCatalogProductAssociation:
     Type: AWS::ServiceCatalog::PortfolioProductAssociation
     Properties:
