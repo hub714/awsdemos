@@ -35,11 +35,12 @@ Parameters:
     MaxLength: '63'
     MinLength: '1'
     Type: String
-    Default: 'notebook-factory-test'
+    Default: 'notebook'
 
   NotebookInstanceType:
     AllowedValues:
       - ml.t2.medium
+      - ml.m5.xlarge
     ConstraintDescription: Must select a valid notebook instance type.
     Default: ml.t2.medium
     Description: Select Instance type for the SageMaker Notebook
@@ -145,7 +146,7 @@ Resources:
         - !Ref DefaultSecurityGroup
       KmsKeyId:
         Fn::ImportValue: !Sub ${Roletype}-DefaultKMSKey
-      NotebookInstanceName: !Ref NotebookInstanceName
+      NotebookInstanceName: !Sub ${GetUsername.Username}-${NotebookInstanceName}
       InstanceType: !Ref NotebookInstanceType
       RoleArn: !GetAtt SageMakerRole.Arn
       LifecycleConfigName: !GetAtt UpdateTFConfig.NotebookInstanceLifecycleConfigName
