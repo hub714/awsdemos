@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Metadata:
+  License: Apache-2.0
+Description: 'SageMaker Notebook Template based on Enable self-service, secured data science using Amazon SageMaker notebooks and AWS Service Catalog AWS blog'
+Parameters:
+
+  Roletype:
+    Description: Team Prefix for authentication purposes (roletype)
+    Type: String
+    AllowedValues:
+      - dsml
+      - labs
+    ConstraintDescription: Must be of value dsml or labs to identify the team
+    Default: dsml
+
+Resources:
+  SvcCatalogNotebookProduct:
+    Type: AWS::ServiceCatalog::CloudFormationProduct
+    Properties:
+      Description: SageMaker Notebook - Python 3.8 TF 2.2
+      Name: SageMaker Notebook Product - Python 3.8 TF 2.2
+      Owner: dsml
+      ProvisioningArtifactParameters:
+        - Info:
+            LoadTemplateFromURL: https://huberttest-pdx.s3-us-west-2.amazonaws.com/notebook-factory/sm-notebook.yml
+          Name: Python 3.8 TF 2.2
+      Tags:
+        - Key: Roletype
+          Value: !Ref Roletype
+  SvcCatalogNotebookPortfolio:
+    Type: AWS::ServiceCatalog::Portfolio
+    Properties:
+      Description: SageMaker Notebook Portfolio - Contains all versions of base notebook configurations
+      DisplayName: SageMaker Notebook Portfolio
+      ProviderName: Data Science
+      Tags:
+        - Key: Roletype
+          Value: !Ref Roletype
+  SvcCatalogProductAssociation:
+    Type: AWS::ServiceCatalog::PortfolioProductAssociation
+    Properties:
+      PortfolioId: !Ref SvcCatalogNotebookPortfolio
+      ProductId: !Ref SvcCatalogNotebookProduct
+  SvcCatalogPrincipalAssociation:
+    Type: AWS::ServiceCatalog::PortfolioPrincipalAssociation
+    Properties:
+      PortfolioId: !Ref SvcCatalogNotebookPortfolio
+      PrincipalARN: !Sub arn:aws:iam::${AWS::AccountId}:role/AdministratorRole
+      PrincipalType: IAM
