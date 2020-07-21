@@ -1,2 +1,0 @@
-# awsdemos
-Some Cool Tagline!
