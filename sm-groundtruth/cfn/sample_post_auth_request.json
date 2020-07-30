@@ -1,0 +1,21 @@
+{
+	"version": "1",
+	"region": "us-west-2",
+	"userPoolId": "us-west-2_ExamplePoolId",
+	"userName": "Okta_ExampleEmail@gmail.com",
+	"callerContext": {
+		"awsSdkVersion": "aws-sdk-unknown-unknown",
+		"clientId": "6smj73EXAMPLECLIENTID8emopahl"
+	},
+	"triggerSource": "PostConfirmation_ConfirmSignUp",
+	"request": {
+		"userAttributes": {
+			"sub": "c86c3ba0-1c9d-42d7-b0f1-cf0e77b1e9dd",
+			"identities": [{"userId":"ExampleEmail@gmail.com","providerName":"Okta","providerType":"SAML","issuer":"http://www.okta.com/exkEXAMPLE2Jst1oh4x6","primary":true,"dateCreated":1585847854827}],
+			"cognito:user_status": "EXTERNAL_PROVIDER",
+			"email_verified": "false",
+			"email": "ExampleEmail@gmail.com"
+		}
+	},
+	"response": {}
+}

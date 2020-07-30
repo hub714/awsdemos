@@ -1,0 +1,108 @@
+Description: >
+  Starting template for Sagemaker-Groundtruth-Demo
+  Last Modified: March 31 2020
+
+Parameters:
+  LabelingS3Bucket:
+    Type: String
+    Default: huberttest-pdx
+
+  CoreStackName:
+    Type: String
+    Default: groundtruth-demo-core
+
+  LabelAttributeName:
+    Type: String
+    Default: DefaultString
+
+  S3ManifestURI:
+    Type: String
+    Default: s3://huberttest-pdx/sm-groundtruth-text/manifest.json
+
+Resources:
+  CreateLabelingJobCustomResource:
+    Description: Create Sagemaker Labeling Job
+    Type: Custom::CreateLabelingJob
+    DependsOn: CreateLabelingJobLambdaFunction
+    Properties:
+      ServiceToken: !GetAtt CreateLabelingJobLambdaFunction.Arn
+      Region: !Ref AWS::Region
+      StackName: !Ref AWS::StackName
+      WorkTeamArn:
+        Fn::ImportValue: !Sub "${CoreStackName}-WorkTeamArn"
+      SageMakerExecutionRole: !GetAtt SageMakerExecutionRole.Arn
+      LabelAttributeName: !Ref LabelAttributeName
+      S3ManifestURI: !Ref S3ManifestURI
+      LabelingS3Bucket: !Ref LabelingS3Bucket
+
+  CreateLabelingJobLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        S3Bucket: !Ref LabelingS3Bucket
+        S3Key: createjob-ner.zip
+      Handler: index.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Runtime: python3.7
+      Timeout: '300'
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      Policies:
+      - PolicyName: labelingJobMinimalPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            - s3:GetObject
+            Resource: !Sub arn:aws:s3:::${LabelingS3Bucket}/*
+          - Effect: Allow
+            Action:
+            - iam:PassRole
+            - sagemaker:CreateLabelingJob
+            Resource: '*'
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: arn:aws:logs:*:*:*
+
+  SageMakerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - sagemaker.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+      Policies:
+      - PolicyName: AllowS3Access
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - s3:PutObject
+            - s3:GetObject
+            Resource: !Sub arn:aws:s3:::${LabelingS3Bucket}/*

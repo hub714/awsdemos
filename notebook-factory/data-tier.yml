@@ -1,0 +1,164 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Template that creates an S3 bucket along with a KMS key.
+
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "S3 Bucket Configuration"
+        Parameters:
+          - S3BucketName
+
+      -
+        Label:
+          default: "Custom Configuration"
+        Parameters:
+          - RoleType
+
+Parameters:
+  S3BucketName:
+    Description: Name of S3 Bucket for training data
+    Type: String
+    Default: notebook-factory-s3-bucket
+
+  RoleType:
+    Description: RoleType for tagging and auth
+    Type: String
+    AllowedValues:
+      - dsml
+      - labs
+    ConstraintDescription: Must be of value dsml to identify the team (to be extended later)
+    Default: dsml
+
+Resources:
+  TrainingDataS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+      BucketName: !Ref S3BucketName
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              KMSMasterKeyID: !Ref KmsKey
+              SSEAlgorithm: aws:kms
+      Tags:
+        - Key: RoleType
+          Value: !Ref RoleType
+
+  KmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub KMS Encryption Key for ${RoleType} teams
+      Enabled: True
+      EnableKeyRotation: True
+      Tags:
+        - Key: RoleType
+          Value: !Ref RoleType
+      KeyPolicy: !Sub |
+        {
+            "Version": "2012-10-17",
+            "Id": "key-consolepolicy-3",
+            "Statement": [
+                {
+                    "Sid": "Enable IAM User Permissions",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "arn:aws:iam::${AWS::AccountId}:root"
+                    },
+                    "Action": "kms:*",
+                    "Resource": "*"
+                },
+                {
+                    "Sid": "Allow access for Key Administrators",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "*"
+                    },
+                    "Action": [
+                        "kms:Create*",
+                        "kms:Describe*",
+                        "kms:Enable*",
+                        "kms:List*",
+                        "kms:Put*",
+                        "kms:Update*",
+                        "kms:Revoke*",
+                        "kms:Disable*",
+                        "kms:Get*",
+                        "kms:Delete*",
+                        "kms:TagResource",
+                        "kms:UntagResource",
+                        "kms:ScheduleKeyDeletion",
+                        "kms:CancelKeyDeletion"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                        "StringLike": {
+                            "aws:PrincipalArn": [
+                                "arn:aws:iam::${AWS::AccountId}:role/AdministratorRole*",
+                                "arn:aws:iam::${AWS::AccountId}:role/${RoleType}*"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Sid": "Allow use of the key",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "*"
+                    },
+                    "Action": [
+                        "kms:Encrypt",
+                        "kms:Decrypt",
+                        "kms:ReEncrypt*",
+                        "kms:GenerateDataKey*",
+                        "kms:DescribeKey"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                        "StringLike": {
+                            "aws:PrincipalArn": [
+                                "arn:aws:iam::${AWS::AccountId}:role/AdministratorRole*",
+                                "arn:aws:iam::${AWS::AccountId}:role/dsml*"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Sid": "Allow attachment of persistent resources",
+                    "Effect": "Allow",
+                    "Principal": {
+                        "AWS": "*"
+                    },
+                    "Action": [
+                        "kms:CreateGrant",
+                        "kms:ListGrants",
+                        "kms:RevokeGrant"
+                    ],
+                    "Resource": "*",
+                    "Condition": {
+                        "StringLike": {
+                            "aws:PrincipalArn": [
+                                "arn:aws:iam::${AWS::AccountId}:role/AdministratorRole*",
+                                "arn:aws:iam::${AWS::AccountId}:role/dsml*"
+                            ]
+                        },
+                        "Bool": {
+                            "kms:GrantIsForAWSResource": "true"
+                        }
+                    }
+                }
+            ]
+        }
+
+Outputs:
+  KMSKeyId:
+    Description: Key Id of the newly created KMS key
+    Value: !Ref KmsKey
+    Export:
+      Name: !Sub ${RoleType}-DefaultKMSKey
